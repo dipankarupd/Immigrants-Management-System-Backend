@@ -10,31 +10,31 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func DBinstance() *mongo.Client {
-	MongoDb := "mongodb://localhost:27017"
-	fmt.Print(MongoDb)
+const connectionstring = "mongodb+srv://immigrantsadmin:dipankar@cluster0.zpi714a.mongodb.net/?retryWrites=true&w=majority"
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(MongoDb))
+func DBinstance() *mongo.Client {
+
+	clientOptions := options.Client().ApplyURI(connectionstring)
+	client, err := mongo.NewClient(clientOptions)
 	if err != nil {
 		log.Fatal(err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	err = client.Connect(ctx)
-
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("connected to mongodb")
+
+	fmt.Println("Connected to MongoDB")
 	return client
 }
 
 var Client *mongo.Client = DBinstance()
 
 func OpenCollection(client *mongo.Client, collectionName string) *mongo.Collection {
-	var collection *mongo.Collection = client.Database("ims").Collection(collectionName)
-
+	collection := client.Database("ims").Collection(collectionName)
 	return collection
 }
