@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/dipankarupd/immigrant-management-system/pkg/config"
 	"github.com/dipankarupd/immigrant-management-system/pkg/model"
@@ -116,6 +117,25 @@ func CreateImmigrant(w http.ResponseWriter, r *http.Request) {
 	util.ParseBody(r, &immigrant)
 	immigrant.SetDefaultValue()
 
+	// Check if staytime is smaller than arrivaldate
+	arrivalDate, err := time.Parse("2006-01-02", immigrant.Arrival_Date)
+	if err != nil {
+		http.Error(w, "Invalid date format for arrivaldate", http.StatusBadRequest)
+		return
+	}
+
+	stayDate, err := time.Parse("2006-01-02", immigrant.Stay_Time)
+	if err != nil {
+		http.Error(w, "Invalid date format for staytime", http.StatusBadRequest)
+		return
+	}
+
+	// Compare only the dates without considering the time
+	if stayDate.Before(arrivalDate) {
+		http.Error(w, "Invalid staytime. It should not be before the arrivaldate.", http.StatusBadRequest)
+		return
+	}
+
 	immigrant.ID = bson.NewObjectId()
 
 	// Get the MongoDB collection
@@ -130,7 +150,7 @@ func CreateImmigrant(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert the immigrant document into the collection
-	_, err := collection.InsertOne(context.TODO(), immigrant)
+	_, err = collection.InsertOne(context.TODO(), immigrant)
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
 			http.Error(w, "Passport number already exists.", http.StatusBadRequest)
@@ -146,10 +166,10 @@ func CreateImmigrant(w http.ResponseWriter, r *http.Request) {
 	response, err := json.Marshal(immigrant)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	w.Write(response)
-
 }
 
 func AcceptImmigrant(w http.ResponseWriter, r *http.Request) {
