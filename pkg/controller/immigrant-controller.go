@@ -203,3 +203,137 @@ func AcceptImmigrant(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write(response)
 }
+
+func GetApprovedImmigrants(w http.ResponseWriter, r *http.Request) {
+	// Get a reference to the MongoDB client from the config package
+	client := config.Client
+	// Get a reference to the "immigrants" collection
+	collection := config.OpenCollection(client, "demo")
+
+	// Create a slice to store the retrieved approved immigrants
+	var approvedImmigrants []model.Immigrant
+
+	// Define a filter to query documents where "approval" field is set to "approved"
+	filter := bson.M{"approval": "approved"}
+
+	// Execute the find operation and store the result in the approvedImmigrants slice
+	cur, err := collection.Find(context.TODO(), filter)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cur.Close(context.TODO())
+
+	// context.TODO() returns a non-nil empty context
+	// this way we can terminate the loop until all the cursors are iterated
+	for cur.Next(context.TODO()) {
+		var immigrant model.Immigrant
+		err := cur.Decode(&immigrant)
+		if err != nil {
+			log.Fatal(err)
+		}
+		approvedImmigrants = append(approvedImmigrants, immigrant)
+	}
+
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Convert the approvedImmigrants slice to JSON
+	response, err := json.Marshal(approvedImmigrants)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Set the content type and write the response
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(response)
+}
+func GetPendingImmigrants(w http.ResponseWriter, r *http.Request) {
+	// Get a reference to the MongoDB client from the config package
+	client := config.Client
+	// Get a reference to the "immigrants" collection
+	collection := config.OpenCollection(client, "demo")
+
+	// Create a slice to store the retrieved pending immigrants
+	var pendingImmigrants []model.Immigrant
+
+	// Define a filter to query documents where "approval" field is set to "pending"
+	filter := bson.M{"approval": "pending"}
+
+	// Execute the find operation and store the result in the pendingImmigrants slice
+	cur, err := collection.Find(context.TODO(), filter)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cur.Close(context.TODO())
+
+	// context.TODO() returns a non-nil empty context
+	// this way we can terminate the loop until all the cursors are iterated
+	for cur.Next(context.TODO()) {
+		var immigrant model.Immigrant
+		err := cur.Decode(&immigrant)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pendingImmigrants = append(pendingImmigrants, immigrant)
+	}
+
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Convert the pendingImmigrants slice to JSON
+	response, err := json.Marshal(pendingImmigrants)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Set the content type and write the response
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(response)
+}
+
+func GetRejectedImmigrants(w http.ResponseWriter, r *http.Request) {
+	// Get a reference to the MongoDB client from the config package
+	client := config.Client
+	// Get a reference to the "immigrants" collection
+	collection := config.OpenCollection(client, "demo")
+
+	// Create a slice to store the retrieved rejected immigrants
+	var rejectedImmigrants []model.Immigrant
+
+	// Define a filter to query documents where "approval" field is set to "rejected"
+	filter := bson.M{"approval": "rejected"}
+
+	// Execute the find operation and store the result in the rejectedImmigrants slice
+	cur, err := collection.Find(context.TODO(), filter)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cur.Close(context.TODO())
+
+	// context.TODO() returns a non-nil empty context
+	// this way we can terminate the loop until all the cursors are iterated
+	for cur.Next(context.TODO()) {
+		var immigrant model.Immigrant
+		err := cur.Decode(&immigrant)
+		if err != nil {
+			log.Fatal(err)
+		}
+		rejectedImmigrants = append(rejectedImmigrants, immigrant)
+	}
+
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Convert the rejectedImmigrants slice to JSON
+	response, err := json.Marshal(rejectedImmigrants)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Set the content type and write the response
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(response)
+}
