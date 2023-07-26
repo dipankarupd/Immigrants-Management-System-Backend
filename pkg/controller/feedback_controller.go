@@ -34,8 +34,19 @@ func CreateFeedback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Retrieve the Immigrant with the provided passportno
+	immigrant := model.Immigrant{}
+	err = immigrantCollection.FindOne(context.Background(), filter).Decode(&immigrant)
+	if err != nil {
+		http.Error(w, "Error retrieving immigrant details", http.StatusInternalServerError)
+		return
+	}
+
+	// Set the ImmigrantID in the Feedback struct
+	feedback.ImmigrantID = immigrant.ID
+
 	// Get the Feedback collection
-	feedbackCollection := config.FeedbackCollection()
+	feedbackCollection := config.OpenCollection(client, "feedbacks")
 
 	// Insert the feedback document into the collection
 	_, err = feedbackCollection.InsertOne(context.Background(), feedback)
@@ -45,11 +56,19 @@ func CreateFeedback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Fetch the complete Feedback document with Immigrant details from the collection
+	insertedFeedback := model.Feedback{}
+	err = feedbackCollection.FindOne(context.Background(), bson.M{"_id": feedback.ID}).Decode(&insertedFeedback)
+	if err != nil {
+		http.Error(w, "Error fetching inserted feedback with Immigrant details", http.StatusInternalServerError)
+		return
+	}
+
 	// Set the response content type to JSON
 	w.Header().Set("Content-Type", "application/json")
 
-	// Return the inserted feedback with the generated ID
-	response, err := json.Marshal(feedback)
+	// Marshal the inserted feedback (with Immigrant details) as the response
+	response, err := json.Marshal(insertedFeedback)
 	if err != nil {
 		log.Printf("Error marshaling the response: %v", err)
 		http.Error(w, "Error marshaling the response", http.StatusInternalServerError)
