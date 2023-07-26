@@ -38,3 +38,8 @@ func OpenCollection(client *mongo.Client, collectionName string) *mongo.Collecti
 	collection := client.Database("ims").Collection(collectionName)
 	return collection
 }
+
+func FeedbackCollection() *mongo.Collection {
+	collection := Client.Database("ims").Collection("feedback")
+	return collection
+}

@@ -14,4 +14,6 @@ var RegisterNewroute = func(router *mux.Router) {
 	router.HandleFunc("/immigrants/pending", controller.GetPendingImmigrants).Methods("GET")
 	router.HandleFunc("/immigrants/rejected", controller.GetRejectedImmigrants).Methods("GET")
 	router.HandleFunc("/immigrants/accept/{passportno}", controller.AcceptImmigrant).Methods("PUT")
+
+	router.HandleFunc("/feedback", controller.CreateFeedback).Methods("POST")
 }
