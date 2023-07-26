@@ -179,6 +179,7 @@ func AcceptImmigrant(w http.ResponseWriter, r *http.Request) {
 
 	if er != nil {
 		http.Error(w, er.Error(), http.StatusInternalServerError)
+		return
 	}
 	client := config.Client
 	collection := config.OpenCollection(client, "demo")
@@ -212,6 +213,17 @@ func AcceptImmigrant(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	// Check if the approval status is "approved"
+	if approval == "approved" {
+		// If approved, send a notification to the immigrant
+		message := "Your immigration application has been approved. Welcome to our country!"
+		err := SendNotification(immigrant.Email, message)
+		if err != nil {
+			http.Error(w, "Error sending notification", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	// Return the updated immigrant object as the response
