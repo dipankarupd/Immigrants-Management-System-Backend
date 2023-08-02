@@ -20,7 +20,7 @@ func CreateFeedback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if the provided passportno exists in the database
+	// Check if the provided passportno exists in the "demo" collection
 	client := config.Client
 	immigrantCollection := config.OpenCollection(client, "demo")
 	filter := bson.M{"passportno": feedback.PassportNo}
@@ -56,19 +56,11 @@ func CreateFeedback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Fetch the complete Feedback document with Immigrant details from the collection
-	insertedFeedback := model.Feedback{}
-	err = feedbackCollection.FindOne(context.Background(), bson.M{"_id": feedback.ID}).Decode(&insertedFeedback)
-	if err != nil {
-		http.Error(w, "Error fetching inserted feedback with Immigrant details", http.StatusInternalServerError)
-		return
-	}
-
 	// Set the response content type to JSON
 	w.Header().Set("Content-Type", "application/json")
 
-	// Marshal the inserted feedback (with Immigrant details) as the response
-	response, err := json.Marshal(insertedFeedback)
+	// Marshal the feedback as the response
+	response, err := json.Marshal(feedback)
 	if err != nil {
 		log.Printf("Error marshaling the response: %v", err)
 		http.Error(w, "Error marshaling the response", http.StatusInternalServerError)
